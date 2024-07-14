@@ -64,3 +64,31 @@ The `<Image>` Component is an extension of the HTML `<img>` tag, and comes with 
 **[Image Optimization Docs](https://nextjs.org/docs/app/building-your-application/optimizing/images)**  
 **[Improving web performance with images (MDN)](https://developer.mozilla.org/en-US/docs/Learn/Performance/Multimedia)**  
 **[Web Fonts (MDN)](https://developer.mozilla.org/en-US/docs/Learn/CSS/Styling_text/Web_fonts)**
+
+## Creating Layouts and Pages
+
+### Pages
+
+Next.js uses **file-system** routing where folders are used to create nested routes. Each folder represents a route segment that maps to a **URL segment**.
+
+![Diagram showing how folders map to URL segments](./illustrations/app_router.png)
+
+You can create separate UIs for each route using `layout.tsx` and `page.tsx` files.
+
+`page.tsx` is a special Next.js file that exports a React component, and it's required for the route to be accessible. In your application, you already have a page file: `/app/page.tsx` - this is the home page associated with the route `/`.
+
+To create a nested route, you can nest folders inside each other and add `page.tsx` files inside them.
+
+By having a special name for page files, Next.js allows you to [colocate](https://nextjs.org/docs/app/building-your-application/routing#colocation) UI components, test files, and other related code with your routes. Only the content inside the page file will be publicly accessible. For example, the `/ui` and `/lib` folders are colocated inside the `/app` folder along with your routes.
+
+### Layouts
+
+In Next.js, you can use a special `layout.tsx` file to create UI that is shared between multiple pages. The `<Layout />` component receives a `children` prop. **This child can either be a page or another layout**.
+
+One benefit of using layouts in Next.js is that on navigation, only the page components update while the layout won't re-render. **This is called [partial rendering](https://nextjs.org/docs/app/building-your-application/routing/linking-and-navigating#3-partial-rendering)**:
+
+![Folder structure showing the dashboard layout nesting the dashboard pages, but only the pages UI swap on navigation](./illustrations/partial_rendering.png)
+
+The `/app/layout.tsx` file is called a **[root layout](https://nextjs.org/docs/app/building-your-application/routing/pages)** and is required. Any UI you add to the root layout will be shared across all pages in your application. You can use the root layout to modify your `<html>` and `<body>` tags, and add metadata.
+
+Since the new layout you've just created (`/app/dashboard/layout.tsx`) is unique to the dashboard pages, you don't need to add any UI to the root layout above.
