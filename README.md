@@ -130,3 +130,93 @@ To show active link you need to get the user's **current path** (current **segme
 [`Next.js Route Handler`](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
 
 TODO: [take notes](https://nextjs.org/learn/dashboard-app/setting-up-your-database)
+
+## Fetching data
+
+### API layer
+
+APIs are an intermediary layer between your application code and database. There are a few cases where you might use an API:
+
+- If you're using 3rd party services that provide an API.
+- If you're fetching data from the client, you want to have an API layer that runs on the server to avoid exposing your database secrets to the client.
+
+In Next.js, you can create API endpoints using **[Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)**.
+
+### Database queries
+
+When you're creating a full-stack application, you'll also need to write logic to interact with your database. For **[relational databases](https://aws.amazon.com/relational-database/)** like **Postgres**, you can do this with **SQL**, or an [ORM](https://vercel.com/docs/storage/vercel-postgres/using-an-orm) like [Prisma](https://www.prisma.io/).
+
+There are a few cases where you have to write database queries:
+
+- When creating your API endpoints, you need to write logic to interact with your database.
+- If you are using **React Server Components** (fetching data on the server), you can skip the API layer, and query your database directly without risking exposing your database secrets to the client.
+
+### Using server component to fetch data
+
+By default, Next.js application use **[React Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)**. Fetching data with Server Components is a relatively new approach and there are a few benefits of using them:
+
+- Server Components support promises, providing a simpler solution for asynchronous tasks like data fetching. You can use `async/await` syntax without reaching out for `useEffect`, `useState` or data fetching libraries.
+- Server Components execute on the server, so you can keep expensive data fetches and logic on the server and only send the result to the client.
+- As mentioned before, since Server Components execute on the server, you can query the database directly without an additional API layer.
+
+### Using SQL
+
+For your dashboard project, you'll write database queries using the [Vercel Postgres SDK](https://vercel.com/docs/storage/vercel-postgres/sdk) and SQL. There are a few reasons why we'll be using SQL:
+
+- **SQL** is the industry standard for querying relational databases (e.g. **ORMs** generate **SQL** under the hood).
+- Having a basic understanding of **SQL** can help you understand the fundamentals of relational databases, allowing you to apply your knowledge to other tools.
+- **SQL** is versatile, allowing you to fetch and manipulate specific data.
+- The Vercel Postgres SDK provides protection against **SQL** injections.
+
+You can call **`sql`** inside any Server Component. But to allow you to navigate the components more easily, we've kept all the data queries in the `data.ts` file, and you can import them into the components.
+
+### Practical data fetching
+
+Taking as reference the way data fetching in implemented in `dashboard/page` there are two things you must be aware of:
+
+1. The data requests are unintentionally blocking each other, creating a **request waterfall**.
+2. By default, Next.js **prerenders** routes to improve performance, this is called **Static Rendering**. So if your data changes, it won't be reflected on your dashboard.
+
+### Requests waterfall
+
+A **_waterfall_** refers to a sequence of network requests that depend on the completion of the previous ones. In the case of data fetching, each request can only begin once the previous one has returned data.
+
+That is exactly what happen in `dashboard/page`.
+
+![Diagram showing time with sequential data fetching and parallel data fetching](./illustrations/request_waterfall.png)
+
+One way to solve this problem is to use **parallel data fetching**.
+
+### Parallel data fetching
+
+A common way to avoid waterfalls is to initiate all data requests at the same time - **in parallel** - using JavaScript `Promise` class:
+
+| Static method                         | Description                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Promise.all(param:Promise[])`        | Accepts an array of Promise objects and executes the asynchronous requests for each promise. If all promises are fulfilled, **returns a Promise object that resolves to an array of the values that each promise resolves to. If any promise is rejected, this method returns the rejected promise and no others**. |
+| `Promise.allSettled(param:Promise[])` | Accepts an array of Promise objects and executes the asynchronous requests for each promise. **Returns a Promise object that resolves to an array of objects for all promises. Within this array, each object has a status property that indicates whether it was fulfilled or rejected.**                          |
+
+**Example:**
+
+```tsx
+const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
+const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
+const invoiceStatusPromise = sql`SELECT
+         SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
+         SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
+         FROM invoices`;
+
+const data = await Promise.all([
+  invoiceCountPromise,
+  customerCountPromise,
+  invoiceStatusPromise,
+]);
+```
+
+By using this pattern, as in `data.ts`, you can:
+
+- Start executing all data fetches at the same time, which can lead to performance gains.
+- Use a native JavaScript pattern that can be applied to any library or framework.
+
+**Cons:**  
+However, there is one disadvantage of relying only on this JavaScript pattern: **what happens if one data request is slower than all the others?**
