@@ -92,3 +92,35 @@ One benefit of using layouts in Next.js is that on navigation, only the page com
 The `/app/layout.tsx` file is called a **[root layout](https://nextjs.org/docs/app/building-your-application/routing/pages)** and is required. Any UI you add to the root layout will be shared across all pages in your application. You can use the root layout to modify your `<html>` and `<body>` tags, and add metadata.
 
 Since the new layout you've just created (`/app/dashboard/layout.tsx`) is unique to the dashboard pages, you don't need to add any UI to the root layout above.
+
+## Navigating between pages
+
+**Why optimize navigation?**  
+To link between pages, you'd traditionally use the `<a>` HTML element, but using this options in React will launch a new request to the server, cause a full refresh on the client resulting in a sub-optimal user experience far from authentic [SPA](https://developer.mozilla.org/en-US/docs/Glossary/SPA) experience.
+
+### The `<Link>` component
+
+In Next.js, you can use the `<Link />` Component to link between pages in your application. `<Link>` allows you to do **[client-side navigation](https://nextjs.org/docs/app/building-your-application/routing/linking-and-navigating#how-routing-and-navigation-works)** with JavaScript.
+
+To use the `<Link />` component, open `/app/ui/dashboard/nav-links.tsx`, and import the Link component from `next/link`.
+
+As you can see, the Link component is similar to using `<a>` tags, but instead of `<a href="…">`, you use `<Link href="…">`.
+
+**Although parts of your application are rendered on the server, there's no full page refresh, making it feel like a web app. Why is that?**
+
+### Automatic code-splitting and prefetching
+
+To improve the navigation experience, Next.js automatically code **splits your application by route segments**. This is different from a traditional **React [SPA](https://developer.mozilla.org/en-US/docs/Glossary/SPA)**, where the **browser loads all your application code on initial load**.
+
+Splitting code by routes means that pages become isolated. **If a certain page throws an error, the rest of the application will still work**.
+
+Furthermore, in production, **whenever `<Link>` components appear in the browser's viewport, Next.js automatically prefetches the code for the linked route in the background**. By the time the user clicks the link, the code for the destination page will already be loaded in the background, and this is what makes the page transition near-instant!
+
+Learn more about **[how navigation works](https://nextjs.org/docs/app/building-your-application/routing/linking-and-navigating#how-routing-and-navigation-works)** and **[router cache](https://nextjs.org/docs/app/building-your-application/caching#router-cache)**.
+
+> **Good to know**  
+> Prefetching is not enabled in development, only in production.
+
+### Showing active links
+
+To show active link you need to get the user's **current path** (current **segment(s) chain**) from the URL. Next.js provides a hook called **[`usePathname()`](https://nextjs.org/docs/app/api-reference/functions/use-pathname)** that you can import from `next/navigation`.
