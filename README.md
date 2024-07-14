@@ -34,3 +34,33 @@ export default function InvoiceStatus({ status }: { status: string }) {
 )}
 ```
 
+## Font optimization
+
+**Why optimize fonts?**  
+Fonts play a significant role in the design of a website, but using custom fonts in your project can affect performance if the font files need to be fetched and loaded.
+
+**[Cumulative Layout Shift](https://web.dev/articles/cls)** is a metric used by Google to evaluate the performance and user experience of a website. With fonts, layout shift happens when the browser initially renders text in a fallback or system font and then swaps it out for a custom font once it has loaded. This swap can cause the text size, spacing, or layout to change, shifting elements around it.
+
+Next.js automatically optimizes fonts in the application when you use the `next/font` module. **It downloads font files at build time and hosts them with your other static assets.** This means when a user visits your application, there are no additional network requests for fonts which would impact performance.
+
+**Learn more:**  
+**[Adding multiple fonts](https://nextjs.org/docs/app/building-your-application/optimizing/fonts#local-fonts)**  
+**[Font module API](https://nextjs.org/docs/app/api-reference/components/font#font-function-arguments)**
+
+> **Good to know:**  
+> We recommend using **[variable fonts](https://fonts.google.com/variablefonts)** for the best performance and flexibility.
+
+## The `<Image>` component
+
+The `<Image>` Component is an extension of the HTML `<img>` tag, and comes with automatic image optimization, such as:
+
+- **Preventing layout shift** automatically when images are loading.
+- **Resizing images** to avoid shipping large images to devices with a smaller viewport.
+- **Lazy loading images** by default (images load as they enter the viewport).
+- **Serving images in modern formats**, like **[WebP](https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types#webp)** and **[AVIF](https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types#avif_image)**, when the browser supports it.
+
+**Learn more:**  
+**[`<Image>` component API](https://nextjs.org/docs/pages/api-reference/components/image)**  
+**[Image Optimization Docs](https://nextjs.org/docs/app/building-your-application/optimizing/images)**  
+**[Improving web performance with images (MDN)](https://developer.mozilla.org/en-US/docs/Learn/Performance/Multimedia)**  
+**[Web Fonts (MDN)](https://developer.mozilla.org/en-US/docs/Learn/CSS/Styling_text/Web_fonts)**
