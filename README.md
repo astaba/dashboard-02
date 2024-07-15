@@ -260,3 +260,35 @@ You can use a Next.js API called `unstable_noStore` from `next/cache` inside you
 
 **Cons:**  
 With dynamic rendering, **your application is only as fast as your slowest data fetch.**
+
+## Streaming
+
+Streaming is a data transfer technique that allows you to break down a route into smaller "chunks" and progressively stream them from the server to the client as they become ready.
+
+![Diagram showing time with sequential data fetching and parallel data fetching](./illustrations/suspended-chunks.png)
+
+By streaming, you can prevent slow data requests from blocking your whole page. This allows the user to see and interact with parts of the page without waiting for all the data to load before any UI can be shown to the user.
+
+![Diagram showing time with sequential data fetching and parallel data fetching](./illustrations/streaming-timeline.png)
+
+**How?**  
+Streaming works well with React's component model, as each component can be considered a **_chunk_**.  
+There are two ways you implement streaming in Next.js:
+
+1. At the page level, with the `loading.tsx` file.
+2. or specific components, with `<Suspense>`.
+
+### Streaming a whole page with `loading.tsx`
+
+**How?**  
+In the route to stream just create a new file called `loading` as a sibling of the `page` file:
+
+**Pro:**
+
+1. `loading.tsx` is a special Next.js file built on top of `Suspense,` it allows you to create fallback UI to show as a replacement while page content loads.
+2. Since `<SideNav>` is static, it's shown immediately. The user can interact with `<SideNav>` while the dynamic content is loading.
+3. The user doesn't have to wait for the page to finish loading before navigating away (this is called **interruptable navigation**).
+
+### Adding loading skeleton
+
+A loading skeleton is a simplified version of the UI. Many websites use them as a placeholder (or fallback) to indicate to users that the content is loading. Any UI you embed into loading.tsx will be embedded as part of the static file, and sent first. Then, the rest of the dynamic content will be streamed from the server to the client.
