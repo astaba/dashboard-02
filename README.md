@@ -292,3 +292,11 @@ In the route to stream just create a new file called `loading` as a sibling of t
 ### Adding loading skeleton
 
 A loading skeleton is a simplified version of the UI. Many websites use them as a placeholder (or fallback) to indicate to users that the content is loading. Any UI you embed into loading.tsx will be embedded as part of the static file, and sent first. Then, the rest of the dynamic content will be streamed from the server to the client.
+
+### Fixing the loading skeleton bug with route groups
+
+Since the previously implemented `loading` file is a level higher in the URL path heirarchy than `/customers/page` and `invoices/page`, the loadig skeleton would apply to both route when navigating to `/dashboard/customers` and `/dashboard/invoices` which result in a bad UX we've got to fix using [route groups](https://nextjs.org/docs/app/building-your-application/routing/route-groups). This way, `loading` file UI will only apply to `/dashboard` URL and to no other sub-URL.
+
+**How:**  
+Route groups allow you to organize files into logical groups without affecting the URL path structure. When you create a new folder using parentheses `()`, the name won't be included in the URL path. So `/dashboard/(overview)/page.tsx` becomes `/dashboard`.  
+Here, you're using a route group to ensure `loading.tsx` only applies to your dashboard overview page. However, you can also use route groups to separate your application into sections (e.g. `(marketing)` routes and `(shop)` routes) or by teams for larger applications...
