@@ -5,7 +5,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
 
-import { lusitana } from "@/app/ui/fonts";
+import { lusitana } from "../lib/fonts";
 import { Button } from "./button";
 
 export default function LoginForm() {

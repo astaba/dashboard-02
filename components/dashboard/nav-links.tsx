@@ -7,7 +7,7 @@ import {
   HomeIcon,
   DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
-import { cn } from "@/app/lib/utils";
+import { cn } from "@/lib/utils";
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.

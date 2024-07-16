@@ -335,4 +335,4 @@ At this stage no [Dynamic capability](#dynamic-rendering) has been implemented y
 - **In development:** Hot Module Replacement run on each file update, resulting in **data-fetch at build time** and **up-to-date UI.**
 - **In production:** Data was fetched once at build time and cached, resulting in permanent stale UI. That is the reason why **artificial delay** with `setTimeOut` is not perceptible, it is managed at build time with all other **database requests** making the streaming staggering effect irrelevant.
 
-> **HACK:** To experiment it over again, update your database, build the production app, launch both production and development servers.
+> **HACK:** To experiment it over again, build the production app, launch both production and development servers, update your database, then refresh both servers.

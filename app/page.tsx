@@ -3,8 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 import styles from "./page.module.css";
-import { lusitana } from "@/app/ui/fonts";
-import AcmeLogo from "@/app/ui/acme-logo";
+import { lusitana } from "@/lib/fonts";
+import AcmeLogo from "@/components/acme-logo";
 
 export default function Page() {
   return (
