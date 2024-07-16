@@ -327,3 +327,12 @@ Don't worry. There isn't a right answer.
 Where you place your suspense boundaries will vary depending on your application. In general, it's good practice to move your data fetches down to the components that need it, and then wrap those components in Suspense. But there is nothing wrong with streaming the sections or the whole page if that's what your application needs.
 
 Don't be afraid to experiment with Suspense and see what works best, it's a powerful API that can help you create more delightful user experiences.
+
+## Implement Dynamic Rendering
+
+At this stage no [Dynamic capability](#dynamic-rendering) has been implemented yet, and after updating the database I experience the **pitfalls of Next.js 14 agressive caching:**
+
+- **In development:** Hot Module Replacement run on each file update, resulting in **data-fetch at build time** and **up-to-date UI.**
+- **In production:** Data was fetched once at build time and cached, resulting in permanent stale UI. That is the reason why **artificial delay** with `setTimeOut` is not perceptible, it is managed at build time with all other **database requests** making the streaming staggering effect irrelevant.
+
+> **HACK:** To experiment it over again, update your database, build the production app, launch both production and development servers.
