@@ -336,3 +336,24 @@ At this stage no [Dynamic capability](#dynamic-rendering) has been implemented y
 - **In production:** Data was fetched once at build time and cached, resulting in permanent stale UI. That is the reason why **artificial delay** with `setTimeOut` is not perceptible, it is managed at build time with all other **database requests** making the streaming staggering effect irrelevant.
 
 > **HACK:** To experiment it over again, build the production app, launch both production and development servers, update your database, then refresh both servers.
+
+## Partial Prerendering
+
+### How does PPR work?
+
+Partial Prerendering uses React's [Suspense](https://react.dev/reference/react/Suspense) (which you learned about in the previous chapter) to defer rendering parts of your application until some condition is met (e.g. data is loaded).
+
+The `Suspense` fallback is embedded into the initial HTML file along with the static content. At build time (or during revalidation), the static content is prerendered to create a static shell. The rendering of dynamic content is postponed until the user requests the route.
+
+**Wrapping a component in `Suspense` doesn't make the component itself dynamic, but rather `Suspense` is used as a boundary between your static and dynamic code.**
+
+### Data optimization summary
+
+To recap, you've done a few things to optimize data fetching in your application, you've:
+
+1. Created a database in the same region as your application code to reduce latency between your server and database.
+2. Fetched data on the server with React Server Components. This allows you to keep expensive data fetches and logic on the server, reduces the client-side JavaScript bundle, and prevents your database secrets from being exposed to the client.
+3. Used SQL to only fetch the data you needed, reducing the amount of data transferred for each request and the amount of JavaScript needed to transform the data in-memory.
+4. Parallelize data fetching with JavaScript - where it made sense to do so.
+5. Implemented Streaming to prevent slow data requests from blocking your whole page, and to allow the user to start interacting with the UI without waiting for everything to load.
+6. Move data fetching down to the components that need it, thus isolating which parts of your routes should be dynamic in preparation for Partial Prerendering.
