@@ -11,15 +11,15 @@ import { formatCurrency } from "./utils";
 
 export async function fetchRevenue() {
   try {
-    // Artificially delay a response for demo purposes.
-    // Don't do this in production :)
-
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    //! TEST: Artificially delay a response for demo purposes.
+    //! Don't do this in production
+    console.log("Fetching revenue data...");
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await sql<Revenue>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch completed after 3 seconds.');
+    //! TEST:
+    console.log("Data fetch completed after 3 seconds.");
 
     return data.rows;
   } catch (error) {
@@ -35,12 +35,13 @@ export async function fetchLatestInvoices() {
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
       ORDER BY invoices.date DESC
-      LIMIT 5`;
-
+      LIMIT 5
+    `;
     const latestInvoices = data.rows.map((invoice) => ({
       ...invoice,
       amount: formatCurrency(invoice.amount),
     }));
+
     return latestInvoices;
   } catch (error) {
     console.error("Database Error:", error);
@@ -50,15 +51,15 @@ export async function fetchLatestInvoices() {
 
 export async function fetchCardData() {
   try {
-    // You can probably combine these into a single SQL query
-    // However, we are intentionally splitting them to demonstrate
-    // how to initialize multiple queries in parallel with JS.
+    //* NOTE: You can probably combine these into a single SQL query
+    //* However, we are intentionally splitting them to demonstrate
+    //* how to initialize multiple queries in parallel with JS.
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
-        SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
-        SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
-        FROM invoices`;
+      SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
+      SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
+      FROM invoices`;
 
     const data = await Promise.all([
       invoiceCountPromise,
@@ -72,8 +73,8 @@ export async function fetchCardData() {
     const totalPendingInvoices = formatCurrency(data[2].rows[0].pending ?? "0");
 
     return {
-      numberOfCustomers,
       numberOfInvoices,
+      numberOfCustomers,
       totalPaidInvoices,
       totalPendingInvoices,
     };
