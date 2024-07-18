@@ -6,6 +6,7 @@ import Table from "@/components/invoices/table";
 import { CreateInvoice } from "@/components/invoices/buttons";
 import { lusitana } from "@/lib/fonts";
 import { InvoicesTableSkeleton } from "@/components/skeletons";
+import { fetchInvoicesPages } from "@/lib/data";
 
 export default async function Page({
   searchParams,
@@ -17,6 +18,11 @@ export default async function Page({
 }) {
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
+
+  // HACK: invoices/page doesn't need the totalPages, only Pagination component
+  // does. But since Pagination is a client component and we are not using an API
+  // layer, fetching there would expose your database secrets.
+  const totalPages = await fetchInvoicesPages(query);
 
   return (
     <div className="w-full">
@@ -30,6 +36,9 @@ export default async function Page({
       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
         <Table query={query} currentPage={currentPage} />
       </Suspense>
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
+      </div>
     </div>
   );
 }

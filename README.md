@@ -406,3 +406,19 @@ It is a programming practice that limits the rate at which a function can fire.
 3. If the timer reaches the end of its countdown, the debounced function is executed.
 
 You can implement debouncing in a few ways, including manually creating your own debounce function. To keep things simple, we'll use a library called **[use-debounce](https://www.npmjs.com/package/use-debounce)**
+
+## Pagination
+
+After introducing the **search** feature, you'll notice the table displays only 6 invoices at a time. This is because the `fetchFilteredInvoices()` function in `data.ts` returns a maximum of 6 invoices per page.
+
+Adding **pagination** allows users to navigate through the different pages to view all the invoices. Let's see how you can implement pagination using URL params, just like you did with search.
+
+**How?**
+
+- To satisfy `Pagination` **functional logic requirement** two critical pieces of information are needed: (1) the current pagination page number (or `currentPage`); (2) a URL generated on the fly and updated with the contextual pagination page number.
+- To satisfy `Pagination` **design requirement** (3) one piece of information is needed: **an array used to design the pagination central console** differently according to the **query result total pages number**(or `totalPages`) and the **current page**.
+
+1. importing `useSearchParams` you can define `currentPage`.
+2. associating `usePathname` with the preceding import, you define a util function to generate on the fly URL partial string updated with the contextual page number query.
+3. the `generatePagination` util function requires `totalPages` only known after the response from the database. So, since `Pagination` is a client component, `totalPages` is fetched from the **parent** `page` component (which is a server component) and received as `props`.
+4. **Lastly:** in the `Search` component **reset to 1** page query for each new query to work.

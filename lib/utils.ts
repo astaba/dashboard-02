@@ -11,7 +11,7 @@ export const formatCurrency = (amount: number) => {
 
 export const formatDateToLocal = (
   dateStr: string,
-  locale: string = "en-US"
+  locale: string = "en-US",
 ) => {
   const date = new Date(dateStr);
   const options: Intl.DateTimeFormatOptions = {
@@ -73,3 +73,8 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const getRandomIndex = (index: number) => {
+  const rand = Math.floor(Math.random() * 100000) + 1;
+  return Number(`${rand}${index}`);
+};

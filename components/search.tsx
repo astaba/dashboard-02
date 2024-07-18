@@ -7,6 +7,7 @@ import { useDebouncedCallback } from "use-debounce";
 // (2) Append the search term to the already existing URLSearchParams
 // if any, and push to the browser History API.
 // (3) Keep the URL in sync with input field via its defaultValue
+// (4) Make sure each new search starts from page 1
 // (5) Debounce the event handler to avoid colapsing the database API
 
 export default function Search({ placeholder }: { placeholder: string }) {
@@ -19,6 +20,7 @@ export default function Search({ placeholder }: { placeholder: string }) {
     // TEST:
     // console.log("Search Input:", term);
     const params = new URLSearchParams(searchParams);
+    if (params.has("page")) params.set("page", "1");
     if (term) params.set("query", term);
     else params.delete("query");
     router.replace(`${pathname}?${params.toString()}`);
