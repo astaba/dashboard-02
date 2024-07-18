@@ -357,3 +357,52 @@ To recap, you've done a few things to optimize data fetching in your application
 4. Parallelize data fetching with JavaScript - where it made sense to do so.
 5. Implemented Streaming to prevent slow data requests from blocking your whole page, and to allow the user to start interacting with the UI without waiting for everything to load.
 6. Move data fetching down to the components that need it, thus isolating which parts of your routes should be dynamic in preparation for Partial Prerendering.
+
+## Adding search with URL search params
+
+Instead of using **client side state** to implement search here are the benefits of doing it with **URL params**:
+
+- **Bookmarkable and Shareable URLs**: Since the search parameters are in the URL, users can bookmark the current state of the application, including their search queries and filters, for future reference or sharing.
+- **Server-Side Rendering and Initial Load**: URL parameters can be directly consumed on the server to render the initial state, making it easier to handle server rendering.
+- **Analytics and Tracking**: Having search queries and filters directly in the URL makes it easier to track user behavior without requiring additional client-side logic.
+
+### How?
+
+1. **`use client`**  
+    * The first thing to notice in the `Search` component is the top level directive, which is required not only because we intend to import some **hook functions**, but mostly because it is required to be able to use **event listener** as on the `onChange` prop.  
+2. **Capture user's input and update URL**  
+   In the `Search` component add an event handler to the `onChange` event listener of the `input` element. Doing so you can retrieve the user's input value and store it in the **current URL** instead of using `useState`. To do it, create a new URL search params based on the current one with `useSearchParams` (it allows you to access the parameters of the current URL. For example, the search params for this URL `/dashboard/invoices?page=1&query=pending` would look like this: `{page: '1', query: 'pending'}`.); and store those values in the current ULR by updating the **browser history stack** with `usePathname` and `useRouter.replace()`.
+3. **Keep URL in sync with the input field**  
+   To ensure the input field is in sync with the URL and will be populated when sharing, you can pass a `defaultValue` to `input` by reading from searchParams.  
+   **Good to know:**  
+   `defaultValue` vs. `value` / **Uncontrolled** vs. **Controlled**  
+   If you're using state to manage the value of an input, you'd use the `value` attribute to make it a controlled component. This means React would manage the input's state.  
+   However, since you're not using `state`, you can use `defaultValue`(a React prop acting as the HTML input value attribute when used as initial default value). This means the native `input` will manage its own state. This is okay since you're saving the search query to the URL instead of `state`.
+4. **Retrieve data from the URL on the server and launch request**  
+   Use the [`searchParams`](https://nextjs.org/docs/app/api-reference/file-conventions/page), a built-in prop of `Page` server components, which is an oject similar to the returned value of `useSearchParams`.  
+   **Notice** the prop `key={query + currentPage}` of the `Suspense` component (around the `Table` component) to ensure `Suspense` is re-rendered each time `query` is updated.  
+
+### When to use the `useSearchParams()` hook vs. the `searchParams` prop?
+
+You might have noticed you used two different ways to extract search params. Whether you use one or the other **depends on whether you're working on the client or the server**.
+
+- `<Search>` is a Client Component, so you used the `useSearchParams()` hook to access the params from the client.
+- `<Table>` is a Server Component that fetches its own data, so you can pass the `searchParams` prop from the `page` to the component.
+
+**General rule**:  
+If you want to read the params from the client, use the `useSearchParams()` hook as this avoids having to go back to the server.
+
+### Best practices: Debouncing
+
+Quering your database on every key stroke is particularly damaging for resources in case your application skale up. That is where **debouncing** comes into play.
+
+**Debouncing:**  
+It is a programming practice that limits the rate at which a function can fire.
+
+**How:**
+
+1. When an event that should be debounced occurs, a timer starts.
+2. If the event occurs again before the timer expires, the timer is reset.
+3. If the timer reaches the end of its countdown, the debounced function is executed.
+
+You can implement debouncing in a few ways, including manually creating your own debounce function. To keep things simple, we'll use a library called **[use-debounce](https://www.npmjs.com/package/use-debounce)**
