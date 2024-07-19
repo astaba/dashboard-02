@@ -6,12 +6,14 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 
+import { createInvoice } from "@/lib/actions";
+
 import { CustomerField } from "@/lib/definitions";
 import { Button } from "@/components/button";
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
   return (
-    <form>
+    <form action={createInvoice}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">

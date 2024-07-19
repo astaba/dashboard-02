@@ -95,7 +95,7 @@ export async function fetchCardData() {
 const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(
   query: string,
-  currentPage: number
+  currentPage: number,
 ) {
   noStore();
 
@@ -185,9 +185,7 @@ export async function fetchCustomers() {
 
   try {
     const data = await sql<CustomerField>`
-      SELECT
-        id,
-        name
+      SELECT id, name
       FROM customers
       ORDER BY name ASC
     `;

@@ -368,8 +368,8 @@ Instead of using **client side state** to implement search here are the benefits
 
 ### How?
 
-1. **`use client`**  
-    * The first thing to notice in the `Search` component is the top level directive, which is required not only because we intend to import some **hook functions**, but mostly because it is required to be able to use **event listener** as on the `onChange` prop.  
+1. **`use client`**
+   - The first thing to notice in the `Search` component is the top level directive, which is required not only because we intend to import some **hook functions**, but mostly because it is required to be able to use **event listener** as on the `onChange` prop.
 2. **Capture user's input and update URL**  
    In the `Search` component add an event handler to the `onChange` event listener of the `input` element. Doing so you can retrieve the user's input value and store it in the **current URL** instead of using `useState`. To do it, create a new URL search params based on the current one with `useSearchParams` (it allows you to access the parameters of the current URL. For example, the search params for this URL `/dashboard/invoices?page=1&query=pending` would look like this: `{page: '1', query: 'pending'}`.); and store those values in the current ULR by updating the **browser history stack** with `usePathname` and `useRouter.replace()`.
 3. **Keep URL in sync with the input field**  
@@ -380,7 +380,7 @@ Instead of using **client side state** to implement search here are the benefits
    However, since you're not using `state`, you can use `defaultValue`(a React prop acting as the HTML input value attribute when used as initial default value). This means the native `input` will manage its own state. This is okay since you're saving the search query to the URL instead of `state`.
 4. **Retrieve data from the URL on the server and launch request**  
    Use the [`searchParams`](https://nextjs.org/docs/app/api-reference/file-conventions/page), a built-in prop of `Page` server components, which is an oject similar to the returned value of `useSearchParams`.  
-   **Notice** the prop `key={query + currentPage}` of the `Suspense` component (around the `Table` component) to ensure `Suspense` is re-rendered each time `query` is updated.  
+   **Notice** the prop `key={query + currentPage}` of the `Suspense` component (around the `Table` component) to ensure `Suspense` is re-rendered each time `query` is updated.
 
 ### When to use the `useSearchParams()` hook vs. the `searchParams` prop?
 
@@ -422,3 +422,34 @@ Adding **pagination** allows users to navigate through the different pages to vi
 2. associating `usePathname` with the preceding import, you define a util function to generate on the fly URL partial string updated with the contextual page number query.
 3. the `generatePagination` util function requires `totalPages` only known after the response from the database. So, since `Pagination` is a client component, `totalPages` is fetched from the **parent** `page` component (which is a server component) and received as `props`.
 4. **Lastly:** in the `Search` component **reset to 1** page query for each new query to work.
+
+## Data mutation
+
+**What are Server Actions?**  
+**React Server Actions** allow you to run asynchronous code directly on the server. They eliminate the need to create API endpoints to mutate your data. Instead, you write asynchronous functions that execute on the server and can be invoked from your **Client** or **Server Components**.  
+Security is a top priority for web applications, as they can be vulnerable to various threats. This is where **Server Actions** come in. They offer an effective security solution, protecting against different types of attacks, securing your data, and ensuring authorized access. Server Actions achieve this through techniques like **POST requests**, **encrypted closures**, **strict input checks**, **error message hashing**, and **host restrictions**, all working together to significantly enhance your app's safety.
+
+### Creating an invoices
+
+Here are the steps you'll take to create a new invoice:
+
+1. Create a form to capture the user's input.
+2. Create a Server Action and invoke it from the form.
+3. Inside your Server Action, extract the data from the `formData` object.
+4. Validate and prepare the data to be inserted into your database.
+5. Insert the data and handle any errors.
+6. Revalidate the cache and redirect the user back to invoices page.
+
+### Updating an invoice
+
+The updating invoice form is similar to the create an invoice form, except you'll need to pass the invoice `id` to update the record in your database. Let's see how you can get and pass the invoice id.
+
+These are the steps you'll take to update an invoice:
+
+1. Create a new dynamic route segment with the invoice `id`.
+2. Read the invoice `id` from the page `params`.
+3. Fetch the specific invoice from your database.
+4. Pre-populate the form with the invoice data.
+5. Update the invoice data in your database.
+
+NOTE: [Learn more](https://nextjs.org/learn/dashboard-app/mutating-data)
