@@ -25,12 +25,22 @@ export async function createInvoice(formData: FormData) {
   const amountInCent = amount * 100;
   const date = new Date().toISOString().split("T")[0];
 
-  await sql`
+  try {
+    await sql`
     INSERT INTO invoices (customer_id, amount, status, date)
     VALUES (${customerId}, ${amountInCent}, ${status}, ${date})
-  `;
+    `;
 
-  revalidatePath("/dashboard/invoices");
+    revalidatePath("/dashboard/invoices");
+  } catch (error) {
+    console.error(error);
+    return {
+      message: "Database error: Failed to Create Invoice",
+    };
+  }
+  // WARN: redirect is called outside the trycatch block because
+  // it works by throwing an error we don't want to be caught.
+  // Thus, redirect won't fire until all the block is successful
   redirect("/dashboard/invoices");
 }
 
@@ -44,7 +54,8 @@ export async function updateInvoice(id: string, formData: FormData) {
   const amountInCent = amount * 100;
   const date = new Date().toISOString().split("T")[0];
 
-  await sql`
+  try {
+    await sql`
     UPDATE invoices
     SET
       customer_id = ${customerId},
@@ -52,13 +63,30 @@ export async function updateInvoice(id: string, formData: FormData) {
       status = ${status},
       date = ${date}
     WHERE id = ${id}
-  `;
+    `;
 
-  revalidatePath("/dashboard/invoices");
+    revalidatePath("/dashboard/invoices");
+  } catch (error) {
+    console.error(error);
+    return {
+      message: "Database error: Failed to Update Invoice",
+    };
+  }
+
   redirect("/dashboard/invoices");
 }
 
 export async function deleteInvoice(id: string) {
-  await sql`DELETE FROM invoices WHERE id = ${id}`;
-  revalidatePath("/dashboard/invoices");
+  // TEST:
+  // throw Error("Failed to delete invoice");
+  try {
+    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    revalidatePath("/dashboard/invoices");
+    return { message: "Deleted invoice" };
+  } catch (error) {
+    console.error(error);
+    return {
+      message: "Database error: Failed to Delete Invoice",
+    };
+  }
 }

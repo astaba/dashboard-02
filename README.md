@@ -453,3 +453,66 @@ These are the steps you'll take to update an invoice:
 5. Update the invoice data in your database.
 
 NOTE: [Learn more](https://nextjs.org/learn/dashboard-app/mutating-data)
+
+### Handling all errors with `error` file
+
+If an error occur within the `action` before the `try/catch` block, it is displayed in the localhost during development but would break the whole application in production.  
+To enhance user experience the [error file](https://nextjs.org/docs/app/api-reference/file-conventions/error) can be used **to define a UI boundary for a route segment**. It serves as a **catch-all** for unexpected errors and allows you to **display a fallback UI** to your users.
+
+**How:**
+
+- `"use client"` - `error.tsx` needs to be a Client Component.
+- It accepts two props:
+  1. `error`: This object is an instance of JavaScript's native Error object.
+  2. `reset`: This is a function to reset the error boundary. When executed, the function will try to re-render the route segment.
+
+#### Good Practice
+
+1. In case of mistaken id, `sql` from `vercel/postgres` will return `data.row` as an empty array and `invoice[0]` as an `undefined` value we need to return. Transforming the response with:
+
+   ```tsx
+   const invoice = data.row[0];
+   invoice.amount = invoice?.amount / 100;
+   ```
+
+   will throw an error within the trycatch block. However using `data.row.map()`, `map()` won't run the argument function on undefined array element, allowing to safely return `undefined` value which subsequent error we intend to handle outside of this function.
+
+2. **Name `data.rows` assigned constant after the database table you are quering FROM.**
+
+   ```tsx
+   export async function fetchInvoiceById(id: string) {
+     noStore();
+
+     try {
+       const data = await sql<InvoiceForm>`
+         SELECT
+           invoices.id,
+           invoices.customer_id,
+           invoices.amount,
+           invoices.status
+         FROM invoices
+         WHERE invoices.id = ${id};
+       `;
+
+       const invoices = data.rows.map((invoice) => ({
+         ...invoice,
+         amount: invoice.amount / 100,
+       }));
+
+       const invoice = invoices[0];
+       return invoice;
+     } catch (error) {
+       console.error("Database Error:", error);
+       throw new Error("Failed to fetch invoice.");
+     }
+   }
+   ```
+
+### Handling 404 errors with the `notFound` function
+
+Another way you can handle errors gracefully is by using the `notFound` function. While `error.tsx` is useful for catching all errors, `notFound` can be used when you try to fetch a resource that doesn't exist.  
+For example if you visit the url `/app/dashboard/invoices/[id]/edit` with a fake `id` the **catch-all** `error` will fire, which is suboptimal when you need to handle **not-found resources** more specificely.
+
+**How:**  
+On the very route leaf (with a `page` file) you want to implement granular error handling create a `not-found`. Within the `page` or the sub-route `page` prone to such error import `{ notFound }` function from `next/navigation`. You can then fire it on any error that fits your usage of **404 error** or **not found resource**.  
+**Remember:** `notFound` will take precedence over `error.tsx,` so you can reach out for it **when you want to handle more specific errors!**
