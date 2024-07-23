@@ -69,12 +69,10 @@ export type CustomersTableType = {
   total_paid: number;
 };
 
-export type FormattedCustomersTable = {
-  id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  total_invoices: number;
+export type FormattedCustomersTable = Omit<
+  CustomersTableType,
+  "total_pending" | "total_paid"
+> & {
   total_pending: string;
   total_paid: string;
 };
