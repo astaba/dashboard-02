@@ -4,24 +4,60 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { sql } from "@vercel/postgres";
 
+export type State = {
+  errors?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+};
+
 const DBInvoiceCodex = z.object({
   id: z.string(),
-  customerId: z.string(),
-  amount: z.coerce.number(),
-  status: z.enum(["pending", "paid"]),
+  customerId: z.string({
+    invalid_type_error: "Please select a customer.",
+  }),
+  amount: z.coerce
+    .number()
+    .gt(0, { message: "Please enter an amount greater than $0." }),
+  status: z.enum(["pending", "paid"], {
+    invalid_type_error: "Please select an invoice status.",
+  }),
   date: z.string(),
 });
 
 const CreateInvoiceCodex = DBInvoiceCodex.omit({ id: true, date: true });
 const UpdateInvoiceCodex = DBInvoiceCodex.omit({ id: true, date: true });
 
-export async function createInvoice(formData: FormData) {
-  const { customerId, amount, status } = CreateInvoiceCodex.parse({
+export async function createInvoice(_prevState: State, formData: FormData) {
+  /* NOTE:
+   * (1)--- Implement zod validation
+   * (2)--- If validation fails, return errors early
+   * (3)--- Prepare data for insertion into the Database
+   * (4)--- Insert data into the Database
+   * (4.1)- If datbase error occurs, return a more specific error
+   * WARN:
+   * (5)--- Redirect is called outside the trycatch block because
+   * it works by throwing an error we don't want to be caught.
+   * Thus, redirect won't fire until all the block is successful
+   * */
+  const codexAsses = CreateInvoiceCodex.safeParse({
     customerId: formData.get("customerId"),
     amount: formData.get("amount"),
     status: formData.get("status"),
   });
 
+  // TEST:
+  // console.log({ ...codexAsses });
+  if (!codexAsses.success) {
+    return {
+      errors: codexAsses.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Create to Invoice.",
+    };
+  }
+
+  const { customerId, amount, status } = codexAsses.data;
   const amountInCent = amount * 100;
   const date = new Date().toISOString().split("T")[0];
 
@@ -38,31 +74,39 @@ export async function createInvoice(formData: FormData) {
       message: "Database error: Failed to Create Invoice",
     };
   }
-  // WARN: redirect is called outside the trycatch block because
-  // it works by throwing an error we don't want to be caught.
-  // Thus, redirect won't fire until all the block is successful
+
   redirect("/dashboard/invoices");
 }
 
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoiceCodex.parse({
+export async function updateInvoice(
+  id: string,
+  _prevState: State,
+  formData: FormData,
+) {
+  const codexAsses = UpdateInvoiceCodex.safeParse({
     customerId: formData.get("customerId"),
     amount: formData.get("amount"),
     status: formData.get("status"),
   });
 
+  if (!codexAsses.success) {
+    return {
+      errors: codexAsses.error.flatten().fieldErrors,
+      message: "Database error: Failed to Update Invoice",
+    };
+  }
+
+  const { status, amount, customerId } = codexAsses.data;
   const amountInCent = amount * 100;
-  const date = new Date().toISOString().split("T")[0];
 
   try {
     await sql`
-    UPDATE invoices
-    SET
-      customer_id = ${customerId},
-      amount = ${amountInCent},
-      status = ${status},
-      date = ${date}
-    WHERE id = ${id}
+      UPDATE invoices
+      SET
+        customer_id = ${customerId},
+        amount = ${amountInCent},
+        status = ${status}
+      WHERE id = ${id}
     `;
 
     revalidatePath("/dashboard/invoices");

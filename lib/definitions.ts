@@ -1,7 +1,9 @@
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
+/* NOTE: This file contains type definitions for your data.
+ * It describes the shape of the data, and what data type each property should accept.
+ * For simplicity of teaching, we're manually defining these types.
+ * However, these types are generated automatically if you're using an ORM such as Prisma.
+ * */
+
 export type User = {
   id: string;
   name: string;
@@ -16,9 +18,9 @@ export type Customer = {
   image_url: string;
 };
 
-// NOTE: id will be created on the database;
-// amount is sent IN CENT to the database to prevent
-// javascript floating-point miscalculation;
+/* NOTE: id will be created on the database;
+ * amount is sent IN CENT to the database to prevent
+ * javascript floating-point miscalculation; */
 export type Invoice = {
   id: string;
   customer_id: string;
@@ -40,7 +42,8 @@ export type LatestInvoice = {
   amount: string;
 };
 
-// The database returns a number for amount, but we later format it to a string with the formatCurrency function
+/* NOTE: The database returns a number for amount,
+ * but we later format it to a string with the formatCurrency function */
 export type LatestInvoiceRaw = Omit<LatestInvoice, "amount"> & {
   amount: number;
 };

@@ -59,9 +59,10 @@ export async function fetchCardData() {
   noStore();
 
   try {
-    //* NOTE: You can probably combine these into a single SQL query
-    //* However, we are intentionally splitting them to demonstrate
-    //* how to initialize multiple queries in parallel with JS.
+    /* NOTE: You can probably combine these into a single SQL query
+     * However, we are intentionally splitting them to demonstrate
+     * how to initialize multiple queries in parallel with JS.
+     * */
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
@@ -167,17 +168,19 @@ export async function fetchInvoiceById(id: string) {
       WHERE invoices.id = ${id};
     `;
 
-    // HACK: (1) In case of mistaken id, sql`` from vercel/postgres will
-    // return data.row as an empty array and invoice[0] as an undefined
-    // value we need to return. Transforming the response with:
-    // const invoice = data.row[0]
-    // invoice.amount = invoice?.amount / 100;
-    // will throw an error within the trycatch block.
-    // However using data.row.map(), map() won't run the argument function
-    // on undefined array element, allowing to safely return undefined value
-    // Which subsequent error we intend to handle outside of this function.
-    // (2) As GOOD PRACTICE name data.rows assigned constant after
-    // the database table you are quering FROM.
+    /* HACK: (1) In case of mistaken id, sql`` from vercel/postgres will
+     * return data.row as an empty array and invoice[0] as an undefined
+     * value we need to return. Transforming the response with:
+     * const invoice = data.row[0]
+     * invoice.amount = invoice?.amount / 100;
+     * will throw an error within the trycatch block.
+     * However using data.row.map(), map() won't run the argument function
+     * on undefined array element, allowing to safely return undefined value
+     * Which subsequent error we intend to handle outside of this function.
+     *
+     * HACK: (2) As GOOD PRACTICE name data.rows assigned constant after
+     * the database table you are quering FROM.
+     * */
 
     const invoices = data.rows.map((invoice) => ({
       ...invoice,
@@ -186,7 +189,7 @@ export async function fetchInvoiceById(id: string) {
     }));
 
     // TEST:
-    console.log("FETCH_INVOICE_RESULT:", invoices);
+    // console.log("FETCH_INVOICE_RESULT:", invoices);
 
     const invoice = invoices[0];
     return invoice;
