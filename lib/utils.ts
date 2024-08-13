@@ -75,6 +75,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const getRandomIndex = (index: number) => {
-  const rand = Math.floor(Math.random() * 100000) + 1;
-  return Number(`${rand}${index}`);
+  const rand = Math.random().toString(36).substring(2, 11);
+  return `${rand}${index}`;
 };

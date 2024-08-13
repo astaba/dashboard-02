@@ -475,7 +475,7 @@ To enhance user experience the [error file](https://nextjs.org/docs/app/api-refe
    invoice.amount = invoice?.amount / 100;
    ```
 
-   will throw an error within the trycatch block. However using `data.row.map()`, `map()` won't run the argument function on undefined array element, allowing to safely return `undefined` value which subsequent error we intend to handle outside of this function.
+   will throw an error within the `trycatch` block. However using `data.row.map()`, `map()` won't run the argument function on undefined array element, allowing to safely return `undefined` value which subsequent error we intend to handle outside of this function.
 
 2. **Name `data.rows` assigned constant after the database table you are quering FROM.**
 
